@@ -4,51 +4,86 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
   .schema({
-    Jobs: a
+    // Jobs Table
+    Job: a
       .model({
-        JobID: a.id().required(),
-        CustomerID: a.string(),
-        JobStatus: a.string(),
-        ScheduledDate: a.string(),
-        TechnicianID: a.string(),
-        ServiceType: a.string(),
-        Priority: a.string(),
-        CreatedAt: a.string(),
+        jobId: a.string().required(), // Primary Key
+        jobStatus: a.string().required(),
+        scheduledDate: a.string().required(),
+        // Define relationship to Technician
+        technicianId: a.string(),
+        technician: a.belongsTo("Technician", "technicianId"),
+        serviceType: a.string().required(),
+        priority: a.string().required(),
+        createdAt: a.string().required(),
+        // Define relationship to JobAssignment
+        assignment: a.hasOne("JobAssignment", "jobId"),
       })
-      .identifier(["JobID"]),
+      .identifier(["jobId"]) // Simplified to single primary key
+      .secondaryIndexes((index) => [
+        // Index for querying by technician
+        index("technicianId")
+          .sortKeys(["scheduledDate"])
+          .queryField("listJobsByTechnician"),
 
-    Technicians: a
-      .model({
-        TechnicianID: a.id(),
-        Name: a.string(),
-        Skills: a.enum([
-          "GR1",
-          "GR2",
-          "GR4",
-          "ESHS",
-          "ICH",
-          "PINT",
-          "MAP",
-          "NDT",
-        ]),
-        Availability: a.boolean(),
-        AssignedJobID: a.string(),
-        Rating: a.float(),
-      })
-      .identifier(["TechnicianID"]),
+        // Index for querying by status
+        index("jobStatus")
+          .sortKeys(["scheduledDate"])
+          .queryField("listJobsByStatus"),
+      ]),
 
-    JobAssignments: a
+    // Technicians Table
+    Technician: a
       .model({
-        AssignmentID: a.id(),
-        JobID: a.string(),
-        TechnicianID: a.string(),
-        AssignedDate: a.string(),
-        CompletionStatus: a.string(),
-        CompletionDate: a.string(),
+        technicianId: a.string().required(), // Partition Key
+        name: a.string().required(),
+        skills: a.string().array(),
+        status: a.string().required(), // Changed from 'availability' to 'status'
+        rating: a.float(),
+        // Relationships
+        currentAssignment: a.hasOne("JobAssignment", "technicianId"),
+        assignments: a.hasMany("JobAssignment", "technicianId"),
       })
-      .identifier(["AssignmentID"]),
+      .identifier(["technicianId"])
+      .secondaryIndexes((index) => [
+        // Index for finding technicians by status
+        index("status")
+          .sortKeys(["rating"])
+          .queryField("listTechniciansByStatus"),
+
+        // Index for technicians by rating
+        index("rating").queryField("listTechniciansByRating"),
+      ]),
+
+    // JobAssignments Table
+    JobAssignment: a
+      .model({
+        assignmentId: a.string().required(), // Partition Key
+        jobId: a.string().required(), // Sort Key
+        technicianId: a.string().required(),
+        assignedDate: a.string().required(), // ISO date
+        completionStatus: a.string().required(), // e.g., Pending, Completed
+        completionDate: a.string(), // Nullable ISO date
+        // Relationships
+        job: a.belongsTo("Job", "jobId"),
+        technician: a.belongsTo("Technician", "technicianId"),
+      })
+      .identifier(["assignmentId", "jobId"])
+      .secondaryIndexes((index) => [
+        // Index for finding assignments by technician
+        index("technicianId")
+          .sortKeys(["assignedDate"])
+          .queryField("listAssignmentsByTechnician"),
+
+        // Index for finding assignments by status
+        index("completionStatus")
+          .sortKeys(["assignedDate"])
+          .queryField("listAssignmentsByStatus"),
+      ]),
   })
-  .authorization((allow) => [allow.publicApiKey()]);
+  .authorization((allow) => [
+    allow.publicApiKey(), // Simplified authorization as requested
+  ]);
 
 export type Schema = ClientSchema<typeof schema>;
 
