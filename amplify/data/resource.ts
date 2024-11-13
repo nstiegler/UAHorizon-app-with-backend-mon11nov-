@@ -1,7 +1,5 @@
 // amplify/data/resource.ts
 
-// amplify/data/resource.ts
-
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
