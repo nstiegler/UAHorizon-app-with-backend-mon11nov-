@@ -4,16 +4,6 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
   .schema({
-    Customer: a
-      .model({
-        customerId: a.id().required(),
-        name: a.string(),
-        engagementStage: a.enum(["PROSPECT", "INTERESTED", "PURCHASED"]),
-        collectionId: a.id(),
-        collection: a.belongsTo("Collection", "collectionId"),
-      })
-      .identifier(["customerId"]),
-
     Jobs: a
       .model({
         JobID: a.id().required(),
