@@ -1,5 +1,5 @@
 import { ColorModeContext, useMode } from "./theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider, Button } from "@mui/material";
 import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -17,6 +17,9 @@ import Pie from "./scenes/pie";
 import Line from "./scenes/line";
 import Geography from "./scenes/geography";
 
+// Importing the DB testing
+import { runSchemaTest } from "./components/SchemaTest.tsx";
+
 function App() {
   const [theme, colorMode] = useMode();
 
@@ -30,6 +33,17 @@ function App() {
           <Sidebar />
           <main className="content">
             <Topbar />
+            {/* Add the button to trigger the schema test */}
+            <div style={{ padding: "20px" }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={runSchemaTest}
+              >
+                Run Schema Test
+              </Button>
+            </div>
+            {/* End code for test button */}
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/team" element={<Team />} />
