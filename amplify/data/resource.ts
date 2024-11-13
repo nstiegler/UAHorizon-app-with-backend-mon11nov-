@@ -4,50 +4,53 @@ import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
   .schema({
-    // Jobs Table with temporary unique name
-    JobTemp: a
+    // Jobs Table
+    Job: a
       .model({
-        jobId: a.string().required(),
+        jobId: a.string().required(), // Primary Key
         jobStatus: a.string().required(),
         scheduledDate: a.string().required(),
         technicianId: a.string(),
-        technician: a.belongsTo("TechnicianTemp", "technicianId"),
+        // Define relationship to Technician
+        technician: a.belongsTo("Technician", "technicianId"),
         serviceType: a.string().required(),
         priority: a.string().required(),
         createdAt: a.string().required(),
-        assignment: a.hasOne("JobAssignmentTemp", "jobId"),
+        // Define relationship to JobAssignment
+        assignment: a.hasOne("JobAssignment", "jobId"),
       })
       .identifier(["jobId"])
       .secondaryIndexes((index) => [
         index("technicianId")
           .sortKeys(["scheduledDate"])
-          .queryField("listJobsByTechnicianTemp"),
+          .queryField("listJobsByTechnician"),
         index("jobStatus")
           .sortKeys(["scheduledDate"])
-          .queryField("listJobsByStatusTemp"),
+          .queryField("listJobsByStatus"),
       ]),
 
-    // Technicians Table with temporary unique name
-    TechnicianTemp: a
+    // Technicians Table
+    Technician: a
       .model({
         technicianId: a.string().required(),
         name: a.string().required(),
         skills: a.string().array(),
         status: a.string().required(),
         rating: a.float(),
-        jobs: a.hasMany("JobTemp", "technicianId"),
-        assignments: a.hasMany("JobAssignmentTemp", "technicianId"),
+        // Relationships
+        jobs: a.hasMany("Job", "technicianId"),
+        assignments: a.hasMany("JobAssignment", "technicianId"),
       })
       .identifier(["technicianId"])
       .secondaryIndexes((index) => [
         index("status")
           .sortKeys(["rating"])
-          .queryField("listTechniciansByStatusTemp"),
-        index("rating").queryField("listTechniciansByRatingTemp"),
+          .queryField("listTechniciansByStatus"),
+        index("rating").queryField("listTechniciansByRating"),
       ]),
 
-    // JobAssignments Table with temporary unique name
-    JobAssignmentTemp: a
+    // JobAssignments Table
+    JobAssignment: a
       .model({
         assignmentId: a.string().required(),
         jobId: a.string().required(),
@@ -55,17 +58,18 @@ const schema = a
         assignedDate: a.string().required(),
         completionStatus: a.string().required(),
         completionDate: a.string(),
-        job: a.belongsTo("JobTemp", "jobId"),
-        technician: a.belongsTo("TechnicianTemp", "technicianId"),
+        // Relationships
+        job: a.belongsTo("Job", "jobId"),
+        technician: a.belongsTo("Technician", "technicianId"),
       })
       .identifier(["assignmentId", "jobId"])
       .secondaryIndexes((index) => [
         index("technicianId")
           .sortKeys(["assignedDate"])
-          .queryField("listAssignmentsByTechnicianTemp"),
+          .queryField("listAssignmentsByTechnician"),
         index("completionStatus")
           .sortKeys(["assignedDate"])
-          .queryField("listAssignmentsByStatusTemp"),
+          .queryField("listAssignmentsByStatus"),
       ]),
   })
   .authorization((allow) => [allow.publicApiKey()]);
