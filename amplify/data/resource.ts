@@ -41,6 +41,7 @@ const schema = a
         status: a.string().required(), // Changed from 'availability' to 'status'
         rating: a.float(),
         // Relationships
+        jobs: a.hasMany("Job", "technicianId"), // Added reciprocal relationship
         currentAssignment: a.hasOne("JobAssignment", "technicianId"),
         assignments: a.hasMany("JobAssignment", "technicianId"),
       })
