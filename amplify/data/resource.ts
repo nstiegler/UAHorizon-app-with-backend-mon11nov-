@@ -1,5 +1,7 @@
 // amplify/data/resource.ts
 
+// amplify/data/resource.ts
+
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 const schema = a
@@ -10,8 +12,8 @@ const schema = a
         jobId: a.string().required(), // Primary Key
         jobStatus: a.string().required(),
         scheduledDate: a.string().required(),
-        // Define relationship to Technician
         technicianId: a.string(),
+        // Define relationship to Technician
         technician: a.belongsTo("Technician", "technicianId"),
         serviceType: a.string().required(),
         priority: a.string().required(),
@@ -19,14 +21,11 @@ const schema = a
         // Define relationship to JobAssignment
         assignment: a.hasOne("JobAssignment", "jobId"),
       })
-      .identifier(["jobId"]) // Simplified to single primary key
+      .identifier(["jobId"])
       .secondaryIndexes((index) => [
-        // Index for querying by technician
         index("technicianId")
           .sortKeys(["scheduledDate"])
           .queryField("listJobsByTechnician"),
-
-        // Index for querying by status
         index("jobStatus")
           .sortKeys(["scheduledDate"])
           .queryField("listJobsByStatus"),
@@ -35,56 +34,47 @@ const schema = a
     // Technicians Table
     Technician: a
       .model({
-        technicianId: a.string().required(), // Partition Key
+        technicianId: a.string().required(),
         name: a.string().required(),
         skills: a.string().array(),
-        status: a.string().required(), // Changed from 'availability' to 'status'
+        status: a.string().required(),
         rating: a.float(),
         // Relationships
-        jobs: a.hasMany("Job", "technicianId"), // Added reciprocal relationship
-        currentAssignment: a.hasOne("JobAssignment", "technicianId"),
+        jobs: a.hasMany("Job", "technicianId"),
         assignments: a.hasMany("JobAssignment", "technicianId"),
       })
       .identifier(["technicianId"])
       .secondaryIndexes((index) => [
-        // Index for finding technicians by status
         index("status")
           .sortKeys(["rating"])
           .queryField("listTechniciansByStatus"),
-
-        // Index for technicians by rating
         index("rating").queryField("listTechniciansByRating"),
       ]),
 
     // JobAssignments Table
     JobAssignment: a
       .model({
-        assignmentId: a.string().required(), // Partition Key
-        jobId: a.string().required(), // Sort Key
+        assignmentId: a.string().required(),
+        jobId: a.string().required(),
         technicianId: a.string().required(),
-        assignedDate: a.string().required(), // ISO date
-        completionStatus: a.string().required(), // e.g., Pending, Completed
-        completionDate: a.string(), // Nullable ISO date
+        assignedDate: a.string().required(),
+        completionStatus: a.string().required(),
+        completionDate: a.string(),
         // Relationships
         job: a.belongsTo("Job", "jobId"),
         technician: a.belongsTo("Technician", "technicianId"),
       })
       .identifier(["assignmentId", "jobId"])
       .secondaryIndexes((index) => [
-        // Index for finding assignments by technician
         index("technicianId")
           .sortKeys(["assignedDate"])
           .queryField("listAssignmentsByTechnician"),
-
-        // Index for finding assignments by status
         index("completionStatus")
           .sortKeys(["assignedDate"])
           .queryField("listAssignmentsByStatus"),
       ]),
   })
-  .authorization((allow) => [
-    allow.publicApiKey(), // Simplified authorization as requested
-  ]);
+  .authorization((allow) => [allow.publicApiKey()]);
 
 export type Schema = ClientSchema<typeof schema>;
 
