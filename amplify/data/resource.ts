@@ -1,6 +1,7 @@
 // amplify/data/resource.ts
 
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { sayHello } from "../functions/say-hello/resource"; // Lambda test function
 
 const schema = a
   .schema({
@@ -71,6 +72,16 @@ const schema = a
           .sortKeys(["assignedDate"])
           .queryField("listAssignmentsByStatus"),
       ]),
+
+    // Lambda Test Function
+
+    sayHello: a
+      .query()
+      .arguments({
+        name: a.string(),
+      })
+      .returns(a.string())
+      .handler(a.handler.function(sayHello)),
   })
   .authorization((allow) => [allow.publicApiKey()]);
 

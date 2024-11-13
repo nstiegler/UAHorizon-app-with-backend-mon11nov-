@@ -5,7 +5,7 @@ import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
 
-// Future componets (needed for routing setup)
+// Routing
 import Team from "./scenes/team";
 import Contacts from "./scenes/contacts";
 import Invoices from "./scenes/invoices";
@@ -19,6 +19,8 @@ import Geography from "./scenes/geography";
 
 // Importing the DB testing
 import { runSchemaTest } from "./components/SchemaTest.tsx";
+
+// AWS Documentation instructions
 
 function App() {
   const [theme, colorMode] = useMode();

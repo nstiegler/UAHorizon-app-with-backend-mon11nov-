@@ -1,6 +1,8 @@
 import { defineBackend } from "@aws-amplify/backend";
-import { auth } from "./auth/resource";
-import { data } from "./data/resource";
+import { auth } from "./auth/resource"; // Cognito
+import { data } from "./data/resource"; // DynamoDB
+import { sayHello } from "./functions/say-hello/resource"; // Lambda function
+import { storage } from "./storage/resource"; // S3
 
 /**
  * @see https://docs.amplify.aws/react/build-a-backend/ to add storage, functions, and more
@@ -8,4 +10,6 @@ import { data } from "./data/resource";
 defineBackend({
   auth,
   data,
+  sayHello,
+  storage,
 });
