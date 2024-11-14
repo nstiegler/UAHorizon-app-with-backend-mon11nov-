@@ -20,8 +20,6 @@ import Geography from "./scenes/geography";
 // Importing the DB testing
 import { runSchemaTest } from "./components/SchemaTest.tsx";
 
-// AWS Documentation instructions
-
 function App() {
   const [theme, colorMode] = useMode();
 
@@ -35,17 +33,6 @@ function App() {
           <Sidebar />
           <main className="content">
             <Topbar />
-            {/* Add the button to trigger the schema test */}
-            <div style={{ padding: "20px" }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={runSchemaTest}
-              >
-                Run Schema Test
-              </Button>
-            </div>
-            {/* End code for test button */}
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/team" element={<Team />} />
